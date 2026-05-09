@@ -8,5 +8,9 @@
 .DS_Store
 
 
+## reveal.js
+presentation/node_modules/
+
+
 ## misc
 .tmp/
