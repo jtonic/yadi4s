@@ -1,0 +1,12 @@
+## Scala
+
+.metals/
+.bsp/
+.scala-build/
+
+## macOS
+.DS_Store
+
+
+## misc
+.tmp/

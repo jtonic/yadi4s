@@ -1,0 +1,14 @@
+[
+  {
+    "label": "scala run",
+    "command": "scala run . --main-class '$ZED_SYMBOL'",
+    "reveal": "always",
+    "tags": ["scala-main"],
+  },
+  {
+    "label": "scala test",
+    "command": "scala test . --test-only '*$ZED_SYMBOL'",
+    "reveal": "always",
+    "tags": ["scala-test"],
+  },
+]
