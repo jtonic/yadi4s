@@ -835,7 +835,7 @@ The Scala 3 feature set has plenty of room to grow this DSL beyond its current f
 | **Maintenance cost** | High (the DSL itself is code to maintain) | Low                          | Low                       | High                              |
 | **Best for**         | Configuration, rules, specs               | General-purpose coding       | Builder patterns, queries | Application architecture          |
 
----
+----
 
 ### Performance Considerations
 
@@ -845,7 +845,7 @@ The Scala 3 feature set has plenty of room to grow this DSL beyond its current f
 - **Features hidden by the DSL** — the underlying APIs may expose capabilities that the DSL doesn't surface (e.g. lazy initialization, scoped lifecycle, ordering guarantees)
 - **When it matters** — if the DSL is on a hot path (e.g. request handling), measure first
 
----
+----
 
 ### Trade-off Summary
 
