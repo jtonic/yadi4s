@@ -8,6 +8,12 @@
         <link rel="stylesheet" href="node_modules/reveal.js/dist/theme/black.css" id="theme" />
         <link rel="stylesheet" href="node_modules/reveal.js/dist/plugin/highlight/monokai.css" />
         <style>
+            body,
+            .reveal {
+                background: radial-gradient(circle at 50% 50%, #0d2b4a 0%, #0a1628 70%);
+                background-attachment: fixed;
+                min-height: 100vh;
+            }
             .reveal .slides section {
                 text-align: left;
             }
@@ -30,6 +36,8 @@
             }
             .reveal pre,
             .reveal table { font-size: 0.7em; }
+            .reveal pre { border-radius: 8px; overflow: hidden; background: rgba(13, 43, 74, 0.6) !important; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); }
+            .reveal pre code { border-radius: 8px; background: transparent !important; }
             .reveal li { font-size: 0.8em; }
             .reveal .slides .center-slide,
             .reveal .slides .center-slide h1,

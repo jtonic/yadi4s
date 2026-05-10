@@ -155,7 +155,7 @@ def yadi4sMain =
 
 | Concept             | Spring DI (Java)               | yadi4s (Scala 3)               |
 | ------------------- | ------------------------------ | ------------------------------ |
-| Injection point     | Constructor / Field            | **Method `using` parameter**   |
+| Injection point     | Constructor / Field            | **Method _using_ parameter**   |
 | Type safety         | Runtime                        | **Compile time**               |
 | Nesting guard       | None                           | **Compile time**               |
 
@@ -220,11 +220,11 @@ Configuration 2: Application:
 
 ----
 
-### Auto-wiring with `given`
+### Auto-wiring with _given_
 
-- In yadi4s, injection happens at the **method level** via `using` parameters — not via constructors or field injection
+- In yadi4s, injection happens at the **method level** via _using_ parameters — not via constructors or field injection
 
-- Dependencies at the method level via `using` parameters
+- Dependencies at the method level via _using_ parameters
 
   ```scala
   // UserService declares what it needs on each method
@@ -242,7 +242,7 @@ Injecting dependencies
 
 ----
 
-Option 1: The "Magic" Implicit Resolution (Preferred)
+Option 1: The "Magic" Implicit Resolution (preferred)
 
   ```scala
   import appCtx.given
@@ -269,7 +269,7 @@ Option 3: Explicitly passing the Context's Macro Resolver
   
 ----
 
-Option 4: Local overrides using standard `given` (for testing)
+Option 4: Local overrides using standard _given_ (for testing)
 
   ```scala
   import appCtx.given
@@ -281,13 +281,13 @@ Option 4: Local overrides using standard `given` (for testing)
 
 ### Why Method-Level Injection?
 
-yadi4s uses **method-level `using` parameters** instead of constructor injection. Why?
+yadi4s uses **method-level _using_ parameters** instead of constructor injection. Why?
 
 - **Decoupled construction** — objects can be defined with partial dependencies
 - **Explicit dependencies** — each method declares exactly what it needs
 - **Refactoring-friendly** — changing a constructor signature doesn't break the DSL
 - **FP-friendly** — local reasoning, the result depends entirely on the inputs
-- **Testable** — local overrides via `given` (no mocks)
+- **Testable** — local overrides via _given_ (no mocks)
 
 ---
 
@@ -357,9 +357,9 @@ def refsMacro(ctxExpr: Expr[Ctx])(using Quotes): Expr[Any] =
 
 The key insight 
 
-**`selectDynamic` is dynamic at runtime, but the refined type makes it static at compile time.** 
+- _selectDynamic_ is dynamic at runtime, but the refined type makes it static at compile time.
 
-You get the safety of a typed API with the flexibility of dynamic dispatch
+- You get the safety of a typed API with the flexibility of dynamic dispatch
 
 ----
 
@@ -414,7 +414,7 @@ it was chosen because a DI-specific problem demanded it
 
 ----
 
-### Opaque Types — "Hide the plumbing"
+### Opaque Types — Hide the plumbing
 
 - Users shouldn't see mutable _ListBuffer_ internals. 
 
@@ -425,7 +425,7 @@ it was chosen because a DI-specific problem demanded it
   opaque type ConfigurationBuilder = ConfigurationBuilder.Internal
   ```
 
-- **What it gives you:** 
+- **What it gives you?** 
   - The DSL user cannot call _.map()_, _.filter()_, or any _ListBuffer_ method on a _CtxBuilder_. 
   - Only the operations the DSL author explicitly provides are available
 
@@ -462,7 +462,7 @@ With context functions (clean)
     builder
   ```
 
-- **What it gives you:** 
+- **What it gives you?** 
   - The builder is an implicit parameter — the compiler threads it. 
   - Users write indentation, not parameter passing
 
@@ -495,7 +495,7 @@ Implementation
       case _       => block                  // T not in scope → proceed
   ```
 
-- **What it gives you:** 
+- **What it gives you?** 
   - Domain rules become compiler rules. 
   - No runtime check, no exception — the code simply won't compile
 
@@ -519,7 +519,7 @@ Implementation
     def asReport: String = ...
   ```
 
-- **What it gives you:** 
+- **What it gives you?** 
   - Domain methods live alongside the type, not inside it
   - The core model stays clean
 
@@ -535,7 +535,7 @@ Implementation
     Ctx(configs, configs.flatMap(_.beans).toSet)
   ```
 
-- **What it gives you:** 
+- **What it gives you?** 
   - `def ctx(init: CtxBuilder ?=> Unit): Ctx` — the return type is _ctx_, not _CtxBuilder_. 
   - The conversion happens automatically
 
@@ -550,7 +550,7 @@ Implementation
     def selectDynamic(name: String): Any
   ```
 
-- **What it gives you:** 
+- **What it gives you?** 
   - Combined with the _refsMacro_ (which builds a refined type), this gives you **dot-notation access with full type safety** — no _asInstanceOf_, no `Map[String, Any]`
 
 ----
@@ -577,7 +577,7 @@ Implementation
       bean(name = "databaseUrl") { "jdbc:postgresql://localhost:5432/mydb" }
   ```
 
-- **What it gives you:** 
+- **What it gives you?** 
   - The DSL reads like a YAML config file, but it's type-checked by Scala
 
 ----
@@ -884,7 +884,7 @@ The Scala 3 feature set has plenty of room to grow this DSL beyond its current f
 2. **Scala 3 macros** make it possible to generate precise types from DSL definitions
 3. **`inline` + `summonFrom`** turn domain rules into compiler rules
 4. **Context functions + opaque types** give you clean syntax without leaking internals
-5. **Method-level `using` injection** leverages Scala 3's implicit resolution as a DI mechanism — no framework magic needed
+5. **Method-level _using_ injection** leverages Scala 3's implicit resolution as a DI mechanism — no framework magic needed
 
 ---
 
