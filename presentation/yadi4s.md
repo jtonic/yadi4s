@@ -4,9 +4,9 @@ a TypeSafe DI DSL in Scala 3
 
 ---
 
-## A. The Context
+## The Context
 
-A **Domain-Specific Language** (DSL) is a mini-language tailored to a problem domain.
+A **Domain-Specific Language** (DSL) is a mini-language tailored to a problem domain
 
 ----
 
@@ -21,14 +21,14 @@ Key traits
 In yadi4s
 
 - you write bean configuration **as if it were a configuration file (yaml)**
-- but the Scala compiler validates every reference.
+- but the Scala compiler validates every reference
 
 ---
 
-## B. The Problem
+## The Problem
 
 - Dependency Injection frameworks like Spring DI solve real problems 
-- ...but they shift type safety from **compile time** to **runtime**.
+- ...but they shift type safety from **compile time** to **runtime**
 
 ----
 
@@ -60,7 +60,7 @@ In yadi4s
 
 - In any other context, the compiler catches them. 
 
-- In Spring DI, they become runtime surprises.
+- In Spring DI, they become runtime surprises
 
 ----
 
@@ -101,7 +101,7 @@ class AppConfig {
 
 ---
 
-## C. The Vision
+## The Vision
 
 A DI container where **the compiler is the test suite**:
 
@@ -134,11 +134,11 @@ def yadi4sMain =
   beanRefs.nonExistent       // ✗ compile error: not a member
 ```
 
-- No strings, no casting, **no reflection** — just the Scala compiler doing its job.
+- No strings, no casting, **no reflection** — just the Scala compiler doing its job
 
 ---
 
-## D. DSL in Action
+## DSL in Action
 
 ----
 
@@ -222,9 +222,9 @@ Configuration 2: Application:
 
 ### Auto-wiring with `given`
 
-- In yadi4s, injection happens at the **method level** via `using` parameters — not via constructors or field injection.
+- In yadi4s, injection happens at the **method level** via `using` parameters — not via constructors or field injection
 
-- Dependencies at the method level via `using` parameters.
+- Dependencies at the method level via `using` parameters
 
   ```scala
   // UserService declares what it needs on each method
@@ -291,11 +291,11 @@ yadi4s uses **method-level `using` parameters** instead of constructor injection
 
 ---
 
-## E. Type-Safe Access
+## Type-Safe Access
 
-This is what makes yadi4s more than a builder pattern.
+This is what makes yadi4s more than a builder pattern
 
-Scala macros give you **compile-time guarantees** that Spring DI can only dream of.
+Scala macros give you **compile-time guarantees** that Spring DI can only dream of
 
 ----
 
@@ -360,7 +360,7 @@ The key insight
 
 **`selectDynamic` is dynamic at runtime, but the refined type makes it static at compile time.** 
 
-You get the safety of a typed API with the flexibility of dynamic dispatch.
+You get the safety of a typed API with the flexibility of dynamic dispatch
 
 ----
 
@@ -407,11 +407,11 @@ It walks the same AST, but instead of building a structural type, it:
 
 ---
 
-## F. Scala 3 Features — Motivated by DI Needs
+## Scala 3 Features — Motivated by DI Needs
 
 Each feature wasn't chosen because it's cool, 
 
-it was chosen because a DI-specific problem demanded it.
+it was chosen because a DI-specific problem demanded it
 
 ----
 
@@ -419,7 +419,7 @@ it was chosen because a DI-specific problem demanded it.
 
 - Users shouldn't see mutable `ListBuffer` internals. 
 
-- They should only see `CtxBuilder` and `ConfigurationBuilder` as opaque handles.
+- They should only see `CtxBuilder` and `ConfigurationBuilder` as opaque handles
 
   ```scala
   opaque type CtxBuilder = ListBuffer[ConfigurationBuilder]
@@ -428,7 +428,7 @@ it was chosen because a DI-specific problem demanded it.
 
 - **What it gives you:** 
   - The DSL user cannot call `.map()`, `.filter()`, or any `ListBuffer` method on a `CtxBuilder`. 
-  - Only the operations the DSL author explicitly provides are available.
+  - Only the operations the DSL author explicitly provides are available
 
 ----
 
@@ -436,7 +436,7 @@ it was chosen because a DI-specific problem demanded it.
 
 - "Thread the builder silently"
 
-- **Problem:** `ctx` needs to provide a `CtxBuilder`, and `configuration` needs a `ConfigurationBuilder` — but passing them explicitly ruins the DSL syntax.
+- **Problem:** `ctx` needs to provide a `CtxBuilder`, and `configuration` needs a `ConfigurationBuilder` — but passing them explicitly ruins the DSL syntax
 
 - Without context functions (ugly):
   ```scala
@@ -465,7 +465,7 @@ With context functions (clean)
 
 - **What it gives you:** 
   - The builder is an implicit parameter — the compiler threads it. 
-  - Users write indentation, not parameter passing.
+  - Users write indentation, not parameter passing
 
 ----
 
@@ -474,7 +474,7 @@ With context functions (clean)
 **inline** + **summonFrom** + **error**
 
 - **Problem:** Nesting `configuration` inside `configuration` is semantically wrong. 
-- In Spring DI, nothing prevents it. In yadi4s, it's a compile error.
+- In Spring DI, nothing prevents it. In yadi4s, it's a compile error
 
   ```scala
   ctx:
@@ -498,22 +498,22 @@ Implementation
 
 - **What it gives you:** 
   - Domain rules become compiler rules. 
-  - No runtime check, no exception — the code simply won't compile.
+  - No runtime check, no exception — the code simply won't compile
 
 ----
 
 ### Macros (`scala.quoted`) — Type-check bean references
 
 - **Problem:** `ctx.refs.someName` must be type-checked. 
-  The compiler needs to know which names exist and what types they have — but the beans are defined dynamically in DSL blocks.
+  The compiler needs to know which names exist and what types they have — but the beans are defined dynamically in DSL blocks
 
-- **Solution:** The `refsMacro` and `resolveBeanImpl` macros inspect the AST at compile time, extract bean definitions, and generate code with precise types.
+- **Solution:** The `refsMacro` and `resolveBeanImpl` macros inspect the AST at compile time, extract bean definitions, and generate code with precise types
 
 ----
 
 ### Extension Methods — Add domain behaviour without pollution
 
-- **Problem:** `Ctx` is a data type. Adding `asReport` to it directly would couple data to presentation.
+- **Problem:** `Ctx` is a data type. Adding `asReport` to it directly would couple data to presentation
 
   ```scala
   extension (ctx: Ctx)
@@ -521,14 +521,14 @@ Implementation
   ```
 
 - **What it gives you:** 
-  - Domain methods live alongside the type, not inside it. 
-  - The core model stays clean.
+  - Domain methods live alongside the type, not inside it
+  - The core model stays clean
 
 ----
 
 ### Implicit Conversion — Builder to result, transparently
 
-- **Problem:** `ctx` internally builds a `CtxBuilder`, but the user expects a `Ctx` back.
+- **Problem:** `ctx` internally builds a `CtxBuilder`, but the user expects a `Ctx` back
 
   ```scala
   given ctxBuilderProvider: Conversion[CtxBuilder, Ctx] = builder =>
@@ -538,13 +538,13 @@ Implementation
 
 - **What it gives you:** 
   - `def ctx(init: CtxBuilder ?=> Unit): Ctx` — the return type is `Ctx`, not `CtxBuilder`. 
-  - The conversion happens automatically.
+  - The conversion happens automatically
 
 ----
 
 ### `Selectable` + Structural Types — Dynamic names, static types
 
-- **Problem:** Bean names are defined at the DSL call site — the compiler can't know them in advance. But we still want `refs.databaseName` to type-check.
+- **Problem:** Bean names are defined at the DSL call site — the compiler can't know them in advance. But we still want `refs.databaseName` to type-check
 
   ```scala
   trait Refs extends Selectable:
@@ -552,13 +552,13 @@ Implementation
   ```
 
 - **What it gives you:** 
-  - Combined with the `refsMacro` (which builds a refined type), this gives you **dot-notation access with full type safety** — no `asInstanceOf`, no `Map[String, Any]`.
+  - Combined with the `refsMacro` (which builds a refined type), this gives you **dot-notation access with full type safety** — no `asInstanceOf`, no `Map[String, Any]`
 
 ----
 
 ### Optional Braces — Configuration, not code
 
-- **Problem:** Curly braces add visual noise that obscures the declarative intent.
+- **Problem:** Curly braces add visual noise that obscures the declarative intent
 
 - **With braces**
   ```scala
@@ -579,7 +579,7 @@ Implementation
   ```
 
 - **What it gives you:** 
-  - The DSL reads like a YAML config file, but it's type-checked by Scala.
+  - The DSL reads like a YAML config file, but it's type-checked by Scala
 
 ----
 
@@ -603,9 +603,12 @@ Implementation
 
 ---
 
-## G. Kotlin vs Scala 3 — Type-Safe Builders Compared
+## Kotlin vs Scala 3 — Type-Safe Builders Compared
 
-Both Kotlin and Scala 3 enable type-safe builders — but the mechanisms differ significantly.
+- Both Kotlin and Scala 3 enable type-safe builders — but the mechanisms differ significantly
+
+
+----
 
 ### The Kotlin approach
 
@@ -628,9 +631,13 @@ fun ctx(init: CtxBuilder.() -> Unit): Ctx {
 }
 ```
 
+----
+
 - **Lambda with receiver** (`T.() -> Unit`) scopes DSL calls
 - **`@DslMarker`** prevents scope mixing — but it's a **runtime annotation**, not a compiler intrinsic
-- No macro system — cannot generate type-safe `refs` or compile-time `resolveBean`
+- **No macro system** — cannot generate type-safe `refs` or compile-time `resolveBean`
+
+----
 
 ### The Scala 3 approach
 
@@ -646,6 +653,8 @@ extension (inline ctx: Ctx)
 - **`inline` + `summonFrom`** prevents nesting — enforced at compile time, no annotation
 - **Macros** generate precise types — `refs.databaseName: String` is a compile-time fact
 
+----
+
 ### Comparison
 
 | Aspect                       | Kotlin                                | Scala 3 (yadi4s)                             |
@@ -654,17 +663,29 @@ extension (inline ctx: Ctx)
 | Prevent scope mixing         | `@DslMarker` annotation               | `inline` + `summonFrom` (compiler intrinsic) |
 | Nesting guard                | Runtime (best-effort)                 | **Compile time**                             |
 | Type-safe bean access        | Not possible (no macros)              | **Macro-generated structural type**          |
+
+----
+
+| Aspect                       | Kotlin                                | Scala 3 (yadi4s)                             |
+| ---------------------------- | ------------------------------------- | -------------------------------------------- |
 | Compile-time bean resolution | Not possible                          | **`resolveBean[T]` macro**                   |
 | Hide internals               | Private constructor                   | Opaque types                                 |
 | Builder → result             | `.build()` call                       | Implicit conversion                          |
 
-**Bottom line:** Kotlin gives you a clean DSL syntax. Scala 3 gives you a clean DSL syntax **plus** compile-time guarantees that Kotlin's type system cannot express.
+
+- **Bottom line:** 
+  - Kotlin gives you a clean DSL syntax. 
+  - Scala 3 gives you a clean DSL syntax **plus** compile-time guarantees that Kotlin's type system cannot express
 
 ---
 
-## H. Top-Down Walkthrough — Building the DSL Layer by Layer
+## Top-Down Walkthrough
 
-The DSL was built **top-down**: start from the desired call site, then add language features until it compiles and enforces the rules.
+The DSL was built **top-down**: 
+- start from the desired call site 
+- then add language features until it compiles and enforces the rules
+
+----
 
 ### Step 1: Write the dream syntax (doesn't compile yet)
 
@@ -675,6 +696,8 @@ val appCtx: Ctx =
       bean(name = "databaseUrl") { "jdbc:postgresql://localhost:5432/mydb" }
 ```
 
+----
+
 ### Step 2: Add context functions — thread the builders
 
 ```scala
@@ -684,7 +707,9 @@ def ctx(init: CtxBuilder ?=> Unit): Ctx =
   builder
 ```
 
-Now `ctx` compiles, but `configuration` inside it doesn't — `CtxBuilder` isn't in scope for `configuration` yet.
+Now `ctx` compiles, but `configuration` inside it doesn't — `CtxBuilder` isn't in scope for `configuration` yet
+
+----
 
 ### Step 3: Add `using` clauses — make builders available
 
@@ -697,7 +722,9 @@ inline def configuration(name: String)(
   ctxBuilder += builder
 ```
 
-Now the DSL compiles — but there's no nesting guard yet.
+Now the DSL compiles — but there's no nesting guard yet
+
+----
 
 ### Step 4: Add `inline` + `summonFrom` — forbid nesting
 
@@ -710,16 +737,16 @@ inline def checkNoNested[T](inline errorMessage: String)(
     case _       => block
 ```
 
-Call it inside `configuration`:
+- Call it inside `configuration`:
 
-```scala
-checkNoNested[ConfigurationBuilder](
-  "`configuration` cannot be nested inside another `configuration`"
-):
-  // ... configuration body
-```
+  ```scala
+  checkNoNested[ConfigurationBuilder](
+    "`configuration` cannot be nested inside another `configuration`"
+  ):
+    // ... configuration body
+  ```
 
-Now illegal nesting is a **compile error**.
+----
 
 ### Step 5: Add opaque types — hide the plumbing
 
@@ -728,7 +755,9 @@ opaque type CtxBuilder = ListBuffer[ConfigurationBuilder]
 opaque type ConfigurationBuilder = ConfigurationBuilder.Internal
 ```
 
-Users can't call `ListBuffer` methods on `CtxBuilder`. Clean API surface.
+Users can't call `ListBuffer` methods on `CtxBuilder`. Clean API surface
+
+----
 
 ### Step 6: Add implicit conversion — builder to result
 
@@ -737,7 +766,9 @@ given Conversion[CtxBuilder, Ctx] = builder =>
   // convert mutable builder to immutable Ctx
 ```
 
-`ctx` returns `Ctx` — users never see `CtxBuilder`.
+`ctx` returns `Ctx` — users never see `CtxBuilder`
+
+----
 
 ### Step 7: Add macros — type-safe bean access
 
@@ -748,7 +779,9 @@ extension (inline ctx: Ctx)
 inline given resolveBean[T]: T = ${ resolveBeanImpl[T]('this) }
 ```
 
-Now `refs.beanName` is type-checked, and `resolveBean[T]` resolves beans by type — all at compile time.
+Now `refs.beanName` is type-checked, and `resolveBean[T]` resolves beans by type — all at compile time
+
+----
 
 ### The layering
 
@@ -768,31 +801,29 @@ Now `refs.beanName` is type-checked, and `resolveBean[T]` resolves beans by type
 └─────────────────────────────────────────┘
 ```
 
-Each layer exists because the layer above needed it. No feature is gratuitous.
+Each layer exists because the layer above needed it. No feature is gratuitous
 
 ---
 
-## I. What's Next
+## What's Next
 
 yadi4s is a proof of concept. A real DI system needs more:
 
 | Feature                              | Why                                                                          | Possible Scala 3 mechanism                                                    |
 | ------------------------------------ | ---------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
-| **Constructor injection (`ref[T]`)** | Alternative to method-level `using` for beans that always need the same deps | `ref[UserRepository]` inside `bean { ... }`, resolved by `resolveBean`        |
 | **Qualifiers**                       | Multiple beans of the same type                                              | `bean(name = "x", qualifier = "primary")` — refined in `resolveBean` matching |
 | **Scoped lifecycle**                 | Singleton, prototype, request-scoped                                         | Context functions + given scoping                                             |
-| **HTTP routes DSL**                  | Wire beans into endpoint handlers                                            | `route("GET", "/users") { ctx.refs.userService.listUsers() }`                 |
-| **`@implicitNotFound`**              | Better error messages when context is missing                                | Annotation on `given` instances                                               |
-| **`constValue` validation**          | Reject empty bean names at compile time                                      | `inline def validateName[N <: String & Singleton]: Unit`                      |
 | **`export` clauses**                 | Flat API from nested objects                                                 | `export Configurations.*; export Beans.*`                                     |
 
-The Scala 3 feature set has plenty of room to grow this DSL beyond its current form — without sacrificing compile-time safety.
+The Scala 3 feature set has plenty of room to grow this DSL beyond its current form — without sacrificing compile-time safety
 
 ---
 
-## J. DSL Pros & Cons
+## DSL Pros & Cons
 
 No silver bullet — the right tool depends on the task. Here's how internal DSLs compare to other abstraction choices:
+
+----
 
 ### Comparison with Other Abstractions
 
@@ -801,6 +832,11 @@ No silver bullet — the right tool depends on the task. Here's how internal DSL
 | **Readability**      | Reads like declarative intent             | Method calls, imperative     | Chained `.then().with()`  | Inversion of control, conventions |
 | **Learning curve**   | Steep (must learn the mini-language)      | Low (standard library calls) | Medium                    | High (conventions, lifecycle)     |
 | **Type safety**      | Compile-time checks built in              | Varies                       | Varies                    | Often runtime-only                |
+
+----
+
+|                      | Internal DSL                              | Traditional API              | Fluent API                | Framework                         |
+| -------------------- | ----------------------------------------- | ---------------------------- | ------------------------- | --------------------------------- |
 | **IDE support**      | Full (same host language)                 | Full                         | Full                      | Partial (annotations, config)     |
 | **Flexibility**      | Low — constrained by DSL grammar          | High — anything goes         | Medium                    | Low — locked into framework       |
 | **Maintenance cost** | High (the DSL itself is code to maintain) | Low                          | Low                       | High                              |
@@ -812,10 +848,10 @@ No silver bullet — the right tool depends on the task. Here's how internal DSL
 
 A DSL is a **wrapper** — it sits on top of existing APIs and inevitably adds overhead:
 
-- **Indirection cost** — each `ctx`, `configuration`, `bean` call adds a layer of function invocation and builder mutation. For most use cases (configuration wiring, test specs) this is negligible.
-- **Allocation cost** — builders (`ListBuffer`, intermediate objects) are allocated and then discarded during the conversion phase. Opaque types hide them but don't eliminate them.
-- **Features hidden by the DSL** — the underlying APIs may expose capabilities that the DSL doesn't surface (e.g. lazy initialization, scoped lifecycle, ordering guarantees). The DSL deliberately _restricts_ the surface area for safety and readability.
-- **When it matters** — if the DSL is on a hot path (e.g. request handling), measure first. Configuration DSLs (like this one) typically run once at startup and the overhead is irrelevant.
+- **Indirection cost** — each `ctx`, `configuration`, `bean` call adds a layer of function invocation and builder mutation
+- **Allocation cost** — builders (`ListBuffer`, intermediate objects) are allocated and then discarded during the conversion phase
+- **Features hidden by the DSL** — the underlying APIs may expose capabilities that the DSL doesn't surface (e.g. lazy initialization, scoped lifecycle, ordering guarantees)
+- **When it matters** — if the DSL is on a hot path (e.g. request handling), measure first
 
 ---
 
@@ -831,7 +867,7 @@ A DSL is a **wrapper** — it sits on top of existing APIs and inevitably adds o
 
 ---
 
-## K. When to Use a DSL?
+## When to Use a DSL?
 
 ### Good Candidates
 
@@ -840,17 +876,15 @@ A DSL is a **wrapper** — it sits on top of existing APIs and inevitably adds o
 - **Build definitions** — sbt, Gradle Kotlin DSL
 - **Routing / HTTP** — path combinators, middleware pipelines
 - **Data pipelines** — ETL, stream processing, query builders
-- **Rules / validation** — business rule engines, form validation
 
-The common thread: **declarative intent over imperative steps**, **read over write**, **non-performance-critical paths**.
+The common thread: **declarative intent over imperative steps**, **read over write**, **non-performance-critical paths**
 
 ---
 
-## L. Takeaways
+## Takeaways
 
 1. **DI failures are type errors** — the compiler should catch them, not the runtime
 2. **Scala 3 macros** make it possible to generate precise types from DSL definitions
 3. **`inline` + `summonFrom`** turn domain rules into compiler rules
 4. **Context functions + opaque types** give you clean syntax without leaking internals
 5. **Method-level `using` injection** leverages Scala 3's implicit resolution as a DI mechanism — no framework magic needed
-6. **Every feature is motivated by a DI need** — this is not a feature showcase, it's a problem solution
