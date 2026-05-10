@@ -27,22 +27,42 @@ In yadi4s
 
 ## B. The Problem
 
-Dependency Injection frameworks like Spring DI solve real problems — but they shift type safety from **compile time** to **runtime**.
+- Dependency Injection frameworks like Spring DI solve real problems 
+- ...but they shift type safety from **compile time** to **runtime**.
+
+----
 
 ### Runtime failures you've seen
 
-```java
-// Spring DI: missing bean — discovered at startup
-NoSuchBeanDefinitionException: No qualifying bean of type 'PersonRepo'
+- NoSuchBeanDefinitionException
 
-// Spring DI: wrong type — discovered at startup
-BeanNotOfRequiredTypeException: Bean named 'personRepo' is expected to be of type 'PersonRepo' but was actually of type 'String'
+  ```
+  NoSuchBeanDefinitionException: No qualifying bean of type 'PersonRepo'
+  ```
 
-// Spring DI: ambiguous — discovered at startup
-NoUniqueBeanDefinitionException: No qualifying bean of type 'NotificationService': expected single matching bean but found 3
-```
+- BeanNotOfRequiredTypeException
 
-These are **type errors**. In any other context, the compiler catches them. In Spring DI, they become runtime surprises — often in production, often after a refactoring session.
+  ```
+  BeanNotOfRequiredTypeException: Bean named 'personRepo' is expected to be 
+  of type 'PersonRepo' but was actually of type 'String'
+  ```
+
+- NoUniqueBeanDefinitionException
+
+  ```
+  NoUniqueBeanDefinitionException: No qualifying bean of type 'NotificationService': 
+  expected single matching bean but found 3
+  ```
+
+----
+
+- These are **type errors**. 
+
+- In any other context, the compiler catches them. 
+
+- In Spring DI, they become runtime surprises.
+
+----
 
 ### The root cause
 
@@ -57,9 +77,13 @@ class AppConfig {
 }
 ```
 
+----
+
 - Bean names and types are **strings and annotations** — invisible to the type checker
 - Wiring happens via **reflection at runtime** — no compile-time validation
 - Refactoring a bean name or type? The compiler won't warn you
+
+----
 
 ### The cost
 
@@ -70,6 +94,8 @@ class AppConfig {
 | Ambiguous match             | Startup         | CI / Staging / Production |
 | Illegal nesting of configs  | Never (no rule) | Unexpected runtime state  |
 | Typo in bean name reference | Runtime         | Production                |
+
+----
 
 **What if none of these could reach runtime?**
 
@@ -85,47 +111,22 @@ A DI container where **the compiler is the test suite**:
 - Nest a `configuration` inside another → **compile error**
 - Typo a bean name → **compile error**
 
+----
+
 ### The ideal call site
 
 ```scala
-import Dsl.Beans.*
-
-object Business:
-  case class DatabaseConfig(url: String, maxConnections: Int)
-  case class User(id: String, name: String, email: String)
-
-  trait UserRepository:
-    def findById(id: String): Option[User]
-    def findAll(): Seq[User]
-
-  class UserRepositoryImpl extends UserRepository:
-    def findById(id: String): Option[User] = Some(User(id, "Magda", "magda@yadi4s.dev"))
-    def findAll(): Seq[User] = Seq(User("1", "Magda", "magda@yadi4s.dev"), User("2", "Anto", "anto@yadi4s.dev"))
-
-  trait UserService:
-    def getUser(id: String)(using UserRepository, DatabaseConfig): Option[User]
-    def listUsers()(using UserRepository): Seq[User]
-
-  class UserServiceImpl extends UserService:
-    def getUser(id: String)(using repo: UserRepository, db: DatabaseConfig): Option[User] =
-      println(s"Querying ${db.url} (pool=${db.maxConnections})")
-      repo.findById(id)
-    def listUsers()(using repo: UserRepository): Seq[User] = repo.findAll()
-
+import yadis.di.*
 @main
 def yadi4sMain =
-  import Business.*
-
   val appCtx: Ctx =
     ctx:
       configuration("Infrastructure"):
         bean(name = "databaseUrl") { "jdbc:postgresql://localhost:5432/mydb" }
-        bean(name = "maxConnections") { 10 }
         bean(name = "databaseConfig") { DatabaseConfig("jdbc:postgresql://localhost:5432/mydb", 10) }
         bean(name = "userRepo") { new UserRepositoryImpl }
       configuration("Application"):
         bean(name = "userService") { new UserServiceImpl }
-
   val beanRefs = appCtx.refs
   beanRefs.databaseUrl       // ✓ type-checked: String
   beanRefs.userRepo          // ✓ type-checked: UserRepository
@@ -133,13 +134,15 @@ def yadi4sMain =
   beanRefs.nonExistent       // ✗ compile error: not a member
 ```
 
-No strings, no casting, no reflection — just the Scala compiler doing its job.
+- No strings, no casting, **no reflection** — just the Scala compiler doing its job.
 
 ---
 
 ## D. DSL in Action
 
-### Spring DI vs yadi4s — side by side
+----
+
+### Spring DI vs yadi4s
 
 | Concept             | Spring DI (Java)               | yadi4s (Scala 3)               |
 | ------------------- | ------------------------------ | ------------------------------ |
@@ -147,16 +150,23 @@ No strings, no casting, no reflection — just the Scala compiler doing its job.
 | Configuration class | `@Configuration class`         | `configuration("name")`        |
 | Bean definition     | `@Bean method`                 | `bean(name = "...") { value }` |
 | Bean reference      | `@Autowired` / `ctx.getBean()` | `ctx.refs.beanName`            |
+
+----
+
+| Concept             | Spring DI (Java)               | yadi4s (Scala 3)               |
+| ------------------- | ------------------------------ | ------------------------------ |
 | Injection point     | Constructor / Field            | **Method `using` parameter**   |
 | Type safety         | Runtime                        | **Compile time**               |
 | Nesting guard       | None                           | **Compile time**               |
 
+----
+
 ### Full example
 
 ```scala
-import Dsl.Beans.*
+import yadis.di.*
 
-object Business:
+object business:
   case class DatabaseConfig(url: String, maxConnections: Int)
   case class User(id: String, name: String, email: String)
 
@@ -180,8 +190,7 @@ object Business:
 
 @main
 def yadi4sMain =
-  import Business.*
-
+  import business.*
   val appCtx: Ctx =
     ctx:
       configuration("Infrastructure"):
@@ -191,11 +200,12 @@ def yadi4sMain =
         bean(name = "userRepo") { new UserRepositoryImpl }
       configuration("Application"):
         bean(name = "userService") { new UserServiceImpl }
-
   println(appCtx.asReport)
 ```
 
-**Output:**
+----
+
+**Output**
 
 ```text
 Configuration 1: Infrastructure:
@@ -208,40 +218,66 @@ Configuration 2: Application:
     Bean 1: userService
 ```
 
+----
+
 ### Auto-wiring with `given`
 
-In yadi4s, injection happens at the **method level** via `using` parameters — not via constructors or field injection.
+- In yadi4s, injection happens at the **method level** via `using` parameters — not via constructors or field injection.
 
-```scala
-// UserService declares what it needs on each method
-trait UserService:
-  def getUser(id: String)(using UserRepository, DatabaseConfig): Option[User]
-  def listUsers()(using UserRepository): Seq[User]
+- Dependencies at the method level via `using` parameters.
 
-class UserServiceImpl extends UserService:
-  def getUser(id: String)(using repo: UserRepository, db: DatabaseConfig): Option[User] =
-    println(s"Querying ${db.url} (pool=${db.maxConnections})")
-    repo.findById(id)
-  def listUsers()(using repo: UserRepository): Seq[User] = repo.findAll()
+  ```scala
+  // UserService declares what it needs on each method
+  trait UserService:
+    def getUser(id: String)(using UserRepository, DatabaseConfig): Option[User]
+  class UserServiceImpl extends UserService:
+    def getUser(id: String)(using repo: UserRepository, db: DatabaseConfig): Option[User] =
+      println(s"Querying ${db.url} (pool=${db.maxConnections})")
+      repo.findById(id)
+  ```
 
-val beanRefs = appCtx.refs
+----
 
-// Option 1: Explicitly passing bean references
-beanRefs.userService.getUser("1")(using beanRefs.userRepo, beanRefs.databaseConfig)
+Injecting dependencies
 
-// Option 2: The "Magic" Implicit Resolution (Preferred)
-import appCtx.given
-beanRefs.userService.getUser("2")
+----
 
-// Option 3: Explicitly passing the Context's Macro Resolver
-beanRefs.userService.listUsers()(using appCtx.resolveBean[UserRepository])
+Option 1: The "Magic" Implicit Resolution (Preferred)
 
-// Option 4: Local overrides using standard `given`
-given DatabaseConfig = DatabaseConfig("jdbc:test", 1)
-beanRefs.userService.getUser("3")
-```
+  ```scala
+  import appCtx.given
+  appCtx.refs.userService.getUser("2")
+  ```
+  
+----
 
----
+Option 2: Explicitly passing bean references
+
+  ```scala
+  val beanRefs = appCtx.refs
+  beanRefs.userService.getUser("1")(using beanRefs.userRepo, beanRefs.databaseConfig)
+  ```
+
+----
+
+Option 3: Explicitly passing the Context's Macro Resolver
+
+  ```scala
+  import appCtx.given
+  appCtx.refs.userService.listUsers()(using appCtx.resolveBean[UserRepository])
+  ```
+  
+----
+
+Option 4: Local overrides using standard `given` (for testing)
+
+  ```scala
+  import appCtx.given
+  given DatabaseConfig = DatabaseConfig("jdbc:test", 1)
+  beanRefs.userService.getUser("3")
+  ```
+
+----
 
 ### Why Method-Level Injection?
 
@@ -250,22 +286,18 @@ yadi4s uses **method-level `using` parameters** instead of constructor injection
 - **Decoupled construction** — objects can be defined with partial dependencies
 - **Explicit dependencies** — each method declares exactly what it needs
 - **Refactoring-friendly** — changing a constructor signature doesn't break the DSL
-
-Example:
-
-```scala
-trait UserService:
-  def getUser(id: String)(using UserRepository, DatabaseConfig): Option[User]
-  def listUsers()(using UserRepository): Seq[User]
-```
-
-This is more flexible than requiring `new UserService(repo, config)`.
+- **FP-friendly** — local reasoning, the result depends entirely on the inputs
+- **Testable** — local overrides via `given` (no mocks)
 
 ---
 
-## E. Type-Safe Access — The Star of the Show
+## E. Type-Safe Access
 
-This is what makes yadi4s more than a builder pattern. Two macros give you **compile-time guarantees** that Spring DI can only dream of.
+This is what makes yadi4s more than a builder pattern.
+
+Scala macros give you **compile-time guarantees** that Spring DI can only dream of.
+
+----
 
 ### `refs` — Structural Typing via Macro
 
@@ -275,6 +307,8 @@ The `refs` extension method triggers a macro that:
 2. Extracts each bean's **name** and **type**
 3. Builds a **refined structural type** with those names as members
 4. Returns an object that the compiler treats as having those exact fields
+
+----
 
 ```scala
 // What the macro sees:
@@ -287,7 +321,9 @@ ctx:
 Refs { def databaseUrl: String; def userRepo: UserRepository }
 ```
 
-**At the call site:**
+----
+
+**At the call site**
 
 ```scala
 val beanRefs = appCtx.refs
@@ -297,7 +333,9 @@ beanRefs.userRepo      // ✓ UserRepository — autocompleted, type-checked
 beanRefs.typosHere     // ✗ compile error: value typosHere is not a member
 ```
 
-**How it works** (`Dsl.scala:34-92`):
+----
+
+**How it works**
 
 ```scala
 trait Refs extends Selectable:
@@ -316,33 +354,47 @@ def refsMacro(ctxExpr: Expr[Ctx])(using Quotes): Expr[Any] =
   // 3. Return 'new RefsImpl(ctx).asInstanceOf[t]'
 ```
 
-The key insight: **`selectDynamic` is dynamic at runtime, but the refined type makes it static at compile time.** You get the safety of a typed API with the flexibility of dynamic dispatch.
+----
 
-### `resolveBean[T]` — Compile-Time Bean Lookup by Type
+The key insight 
 
-The `resolveBean` macro answers a single question: _given this context, which bean provides type `T`?_
+**`selectDynamic` is dynamic at runtime, but the refined type makes it static at compile time.** 
 
-```scala
-inline given resolveBean[T]: T = ${ resolveBeanImpl[T]('this) }
-```
+You get the safety of a typed API with the flexibility of dynamic dispatch.
+
+----
+
+### Compile-Time Bean Lookup by Type **resolveBean[T]**
+
+- The `resolveBean` macro answers a single question 
+
+- _given this context, which bean provides type `T`?_
+
+- definition
+
+  ```scala
+  inline given resolveBean[T]: T = ${ resolveBeanImpl[T]('this) }
+  ```
+
+- call-site
+
+  ```scala
+  val userRepo = beanRefs.resolveBean[UserRepository]
+  ```
+
+----
+
+**Explanation**
 
 It walks the same AST, but instead of building a structural type, it:
 
-1. Collects all `(name, TypeRepr)` pairs from `bean(...)` calls
-2. Filters by `tpe <:< TypeRepr.of[T]` (subtype check)
+1. Collects all **(name, TypeRepr)** pairs from `bean(...)` calls
+2. Filters by **tpe <:< TypeRepr.of[T]** (subtype check)
 3. **Zero matches** → compile error: `No bean found matching type T`
 4. **One match** → generates `new RefsImpl(ctx).selectDynamic(name).asInstanceOf[T]`
 5. **Multiple matches** → compile error: `Ambiguous dependency for type T. Found matching beans: a, b`
 
-**Example:**
-
-```scala
-import appCtx.given
-
-// The compiler resolves `UserRepository` → finds "userRepo"
-beanRefs.userService.listUsers()
-// (using UserRepository) ↑ implicit, resolved by resolveBean[UserRepository]
-```
+----
 
 ### Summary: What the Compiler Catches
 
@@ -357,145 +409,179 @@ beanRefs.userService.listUsers()
 
 ## F. Scala 3 Features — Motivated by DI Needs
 
-Each feature wasn't chosen because it's cool — it was chosen because a DI-specific problem demanded it.
+Each feature wasn't chosen because it's cool, 
+
+it was chosen because a DI-specific problem demanded it.
+
+----
 
 ### Opaque Types — "Hide the plumbing"
 
-**Problem:** Users shouldn't see mutable `ListBuffer` internals. They should only see `CtxBuilder` and `ConfigurationBuilder` as opaque handles.
+- Users shouldn't see mutable `ListBuffer` internals. 
 
-```scala
-opaque type CtxBuilder = ListBuffer[ConfigurationBuilder]
-opaque type ConfigurationBuilder = ConfigurationBuilder.Internal
-```
+- They should only see `CtxBuilder` and `ConfigurationBuilder` as opaque handles.
 
-**What it gives you:** The DSL user cannot call `.map()`, `.filter()`, or any `ListBuffer` method on a `CtxBuilder`. Only the operations the DSL author explicitly provides are available.
+  ```scala
+  opaque type CtxBuilder = ListBuffer[ConfigurationBuilder]
+  opaque type ConfigurationBuilder = ConfigurationBuilder.Internal
+  ```
 
----
+- **What it gives you:** 
+  - The DSL user cannot call `.map()`, `.filter()`, or any `ListBuffer` method on a `CtxBuilder`. 
+  - Only the operations the DSL author explicitly provides are available.
 
-### Context Functions (`?=>`) — "Thread the builder silently"
+----
 
-**Problem:** `ctx` needs to provide a `CtxBuilder`, and `configuration` needs a `ConfigurationBuilder` — but passing them explicitly ruins the DSL syntax.
+### Context Functions (`?=>`) 
 
-```scala
-// Without context functions (ugly):
-ctx(builder1 => {
-  configuration("Infrastructure", builder1, builder2 => {
-    bean("databaseUrl", builder2, "jdbc:postgresql://localhost:5432/mydb")
+- "Thread the builder silently"
+
+- **Problem:** `ctx` needs to provide a `CtxBuilder`, and `configuration` needs a `ConfigurationBuilder` — but passing them explicitly ruins the DSL syntax.
+
+- Without context functions (ugly):
+  ```scala
+  ctx(builder1 => {
+    configuration("Infrastructure", builder1, builder2 => {
+      bean("databaseUrl", builder2, "jdbc:postgresql://localhost:5432/mydb")
+    })
   })
-})
 
-// With context functions (clean):
-ctx:
-  configuration("Infrastructure"):
-    bean(name = "databaseUrl") { "jdbc:postgresql://localhost:5432/mydb" }
-```
+----
 
-```scala
-def ctx(init: CtxBuilder ?=> Unit): Ctx =
-  given builder: CtxBuilder = CtxBuilder()
-  init
-  builder
-```
+With context functions (clean)
 
-**What it gives you:** The builder is an implicit parameter — the compiler threads it. Users write indentation, not parameter passing.
+  ```scala
+  ctx:
+    configuration("Infrastructure"):
+      bean(name = "databaseUrl") { "jdbc:postgresql://localhost:5432/mydb" }
+  ```
 
----
+  ```scala
+  def ctx(init: CtxBuilder ?=> Unit): Ctx =
+    given builder: CtxBuilder = CtxBuilder()
+    init
+    builder
+  ```
 
-### `inline` + `summonFrom` + `error` — "Forbid illegal nesting at compile time"
+- **What it gives you:** 
+  - The builder is an implicit parameter — the compiler threads it. 
+  - Users write indentation, not parameter passing.
 
-**Problem:** Nesting `configuration` inside `configuration` is semantically wrong. In Spring DI, nothing prevents it. In yadi4s, it's a compile error.
+----
 
-```scala
-ctx:
-  configuration("Outer"):
-    configuration("Inner"):   // ✗ compile error
-      bean(name = "x") { 1 }
-```
+### Forbid illegal nesting at compile time
 
-```scala
-inline def checkNoNested[T](inline errorMessage: String)(
-    inline block: => Unit
-): Unit =
-  summonFrom:
-    case given T => error(errorMessage)   // T already in scope → error
-    case _       => block                  // T not in scope → proceed
-```
+**inline** + **summonFrom** + **error**
 
-**What it gives you:** Domain rules become compiler rules. No runtime check, no exception — the code simply won't compile.
+- **Problem:** Nesting `configuration` inside `configuration` is semantically wrong. 
+- In Spring DI, nothing prevents it. In yadi4s, it's a compile error.
 
----
+  ```scala
+  ctx:
+    configuration("Outer"):
+      configuration("Inner"):   // ✗ compile error
+        bean(name = "x") { 1 }
+  ```
 
-### Macros (`scala.quoted`) — "Type-check bean references"
+----
 
-**Problem:** `ctx.refs.someName` must be type-checked. The compiler needs to know which names exist and what types they have — but the beans are defined dynamically in DSL blocks.
+Implementation
 
-**Solution:** The `refsMacro` and `resolveBeanImpl` macros inspect the AST at compile time, extract bean definitions, and generate code with precise types.
+  ```scala
+  inline def checkNoNested[T](inline errorMessage: String)(
+      inline block: => Unit
+  ): Unit =
+    summonFrom:
+      case given T => error(errorMessage)   // T already in scope → error
+      case _       => block                  // T not in scope → proceed
+  ```
 
-(See Section 4 for full detail.)
+- **What it gives you:** 
+  - Domain rules become compiler rules. 
+  - No runtime check, no exception — the code simply won't compile.
 
----
+----
 
-### Extension Methods — "Add domain behaviour without pollution"
+### Macros (`scala.quoted`) — Type-check bean references
 
-**Problem:** `Ctx` is a data type. Adding `asReport` to it directly would couple data to presentation.
+- **Problem:** `ctx.refs.someName` must be type-checked. 
+  The compiler needs to know which names exist and what types they have — but the beans are defined dynamically in DSL blocks.
 
-```scala
-extension (ctx: Ctx)
-  def asReport: String = ...
-```
+- **Solution:** The `refsMacro` and `resolveBeanImpl` macros inspect the AST at compile time, extract bean definitions, and generate code with precise types.
 
-**What it gives you:** Domain methods live alongside the type, not inside it. The core model stays clean.
+----
 
----
+### Extension Methods — Add domain behaviour without pollution
 
-### Implicit Conversion — "Builder to result, transparently"
+- **Problem:** `Ctx` is a data type. Adding `asReport` to it directly would couple data to presentation.
 
-**Problem:** `ctx` internally builds a `CtxBuilder`, but the user expects a `Ctx` back.
+  ```scala
+  extension (ctx: Ctx)
+    def asReport: String = ...
+  ```
 
-```scala
-given ctxBuilderProvider: Conversion[CtxBuilder, Ctx] = builder =>
-  val configs = builder.map(b => Configuration(b.name, b.beans.toList)).toList
-  Ctx(configs, configs.flatMap(_.beans).toSet)
-```
+- **What it gives you:** 
+  - Domain methods live alongside the type, not inside it. 
+  - The core model stays clean.
 
-**What it gives you:** `def ctx(init: CtxBuilder ?=> Unit): Ctx` — the return type is `Ctx`, not `CtxBuilder`. The conversion happens automatically.
+----
 
----
+### Implicit Conversion — Builder to result, transparently
 
-### `Selectable` + Structural Types — "Dynamic names, static types"
+- **Problem:** `ctx` internally builds a `CtxBuilder`, but the user expects a `Ctx` back.
 
-**Problem:** Bean names are defined at the DSL call site — the compiler can't know them in advance. But we still want `refs.databaseName` to type-check.
+  ```scala
+  given ctxBuilderProvider: Conversion[CtxBuilder, Ctx] = builder =>
+    val configs = builder.map(b => Configuration(b.name, b.beans.toList)).toList
+    Ctx(configs, configs.flatMap(_.beans).toSet)
+  ```
 
-```scala
-trait Refs extends Selectable:
-  def selectDynamic(name: String): Any
-```
+- **What it gives you:** 
+  - `def ctx(init: CtxBuilder ?=> Unit): Ctx` — the return type is `Ctx`, not `CtxBuilder`. 
+  - The conversion happens automatically.
 
-Combined with the `refsMacro` (which builds a refined type), this gives you **dot-notation access with full type safety** — no `asInstanceOf`, no `Map[String, Any]`.
+----
 
----
+### `Selectable` + Structural Types — Dynamic names, static types
 
-### Optional Braces — "Configuration, not code"
+- **Problem:** Bean names are defined at the DSL call site — the compiler can't know them in advance. But we still want `refs.databaseName` to type-check.
 
-**Problem:** Curly braces add visual noise that obscures the declarative intent.
+  ```scala
+  trait Refs extends Selectable:
+    def selectDynamic(name: String): Any
+  ```
 
-```scala
-// With braces:
-ctx{
-  configuration("Infrastructure") {
-    bean("databaseUrl") { "jdbc:postgresql://localhost:5432/mydb" }
+- **What it gives you:** 
+  - Combined with the `refsMacro` (which builds a refined type), this gives you **dot-notation access with full type safety** — no `asInstanceOf`, no `Map[String, Any]`.
+
+----
+
+### Optional Braces — Configuration, not code
+
+- **Problem:** Curly braces add visual noise that obscures the declarative intent.
+
+- **With braces**
+  ```scala
+  ctx {
+    configuration("Infrastructure") {
+      bean("databaseUrl") { "jdbc:postgresql://localhost:5432/mydb" }
+    }
   }
-}
+  ```
 
-// Without braces (Scala 3):
-ctx:
-  configuration("Infrastructure"):
-    bean(name = "databaseUrl") { "jdbc:postgresql://localhost:5432/mydb" }
-```
+----
 
-**What it gives you:** The DSL reads like a YAML config file, but it's type-checked by Scala.
+**Without braces** (Scala 3):
+  ```scala
+  ctx:
+    configuration("Infrastructure"):
+      bean(name = "databaseUrl") { "jdbc:postgresql://localhost:5432/mydb" }
+  ```
 
----
+- **What it gives you:** 
+  - The DSL reads like a YAML config file, but it's type-checked by Scala.
+
+----
 
 ### Feature → DI Need summary
 
@@ -505,6 +591,11 @@ ctx:
 | Context functions (`?=>`)         | Thread builders without polluting syntax      |
 | `inline` + `summonFrom` + `error` | Compile-time nesting guard                    |
 | Macros (`scala.quoted`)           | Compile-time bean resolution & type-safe refs |
+
+----
+
+| Scala 3 Feature                   | DI Need                                       |
+| --------------------------------- | --------------------------------------------- |
 | Extension methods                 | Add domain methods without coupling           |
 | Implicit conversion               | Builder → immutable result transparently      |
 | `Selectable` + structural types   | Dot-notation bean access with type safety     |

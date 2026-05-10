@@ -2,8 +2,8 @@ import scala.collection.mutable.ListBuffer
 import scala.compiletime.{summonFrom, error}
 import scala.quoted.*
 
-object Dsl:
-  object Beans:
+object yadis:
+  object di:
     case class Ctx(configurations: List[Configuration], beans: Set[Bean[?]]):
       override def toString: String =
         s"Ctx(configurations=[${configurations.map(_.toString).mkString(", ")}], beans=$beans)"

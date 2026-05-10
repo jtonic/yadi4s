@@ -1,45 +1,55 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>yadi4s — TypeSafe DI DSL in Scala 3</title>
-    <link rel="stylesheet" href="node_modules/reveal.js/dist/reveal.css">
-    <link rel="stylesheet" href="node_modules/reveal.js/dist/theme/black.css" id="theme">
-    <link rel="stylesheet" href="node_modules/reveal.js/dist/plugin/highlight/monokai.css">
-    <style>
-      .reveal .slides section { text-align: left; }
-      .reveal .slides section h1,
-      .reveal .slides section h2,
-      .reveal .slides section h3 { text-align: left; }
-      .reveal .slides section h1,
-      .reveal .slides section h2,
-      .reveal .slides section h3 { text-transform: none; }
-      .reveal strong { color: #42a5f5; }
-    </style>
-  </head>
-  <body>
-    <div class="reveal">
-      <div class="slides">
-        <section data-markdown="yadi4s.md"
-                 data-separator="^---$"
-                 data-separator-vertical="^----$"
-                 data-charset="utf-8">
-        </section>
-      </div>
-    </div>
-    <script src="node_modules/reveal.js/dist/reveal.js"></script>
-    <script src="node_modules/reveal.js/dist/plugin/markdown.js"></script>
-    <script src="node_modules/reveal.js/dist/plugin/highlight.js"></script>
-    <script src="node_modules/reveal.js/dist/plugin/notes.js"></script>
-    <script>
-      Reveal.initialize({
-        plugins: [RevealMarkdown, RevealHighlight, RevealNotes],
-        hash: true,
-      });
-      Reveal.on('ready', () => {
-        document.querySelectorAll('.slides li').forEach(li => li.classList.add('fragment'));
-      });
-    </script>
-  </body>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>yadi4s — TypeSafe DI DSL in Scala 3</title>
+        <link rel="stylesheet" href="node_modules/reveal.js/dist/reveal.css" />
+        <link rel="stylesheet" href="node_modules/reveal.js/dist/theme/black.css" id="theme" />
+        <link rel="stylesheet" href="node_modules/reveal.js/dist/plugin/highlight/monokai.css" />
+        <style>
+            .reveal .slides section {
+                text-align: left;
+            }
+            .reveal .slides section h1,
+            .reveal .slides section h2,
+            .reveal .slides section h3 {
+                text-align: left;
+            }
+            .reveal .slides section h1,
+            .reveal .slides section h2,
+            .reveal .slides section h3 {
+                text-transform: none;
+            }
+            .reveal strong {
+                color: #42a5f5;
+            }
+            .reveal pre,
+            /*.reveal code { font-size: 0.6em; white-space: pre-wrap; word-wrap: break-word; } */
+            .reveal table { font-size: 0.8em; }
+            .reveal code {
+                font-size: 0.6em;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="reveal">
+            <div class="slides">
+                <section data-markdown="yadi4s.md" data-separator="^---$" data-separator-vertical="^----$" data-charset="utf-8"></section>
+            </div>
+        </div>
+        <script src="node_modules/reveal.js/dist/reveal.js"></script>
+        <script src="node_modules/reveal.js/dist/plugin/markdown.js"></script>
+        <script src="node_modules/reveal.js/dist/plugin/highlight.js"></script>
+        <script src="node_modules/reveal.js/dist/plugin/notes.js"></script>
+        <script>
+            Reveal.initialize({
+                plugins: [RevealMarkdown, RevealHighlight, RevealNotes],
+                hash: true,
+            });
+            Reveal.on("ready", () => {
+                document.querySelectorAll(".slides li").forEach((li) => li.classList.add("fragment"));
+            });
+        </script>
+    </body>
 </html>
