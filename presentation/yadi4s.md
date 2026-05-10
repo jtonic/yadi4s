@@ -786,23 +786,14 @@ Now _refs.beanName_ is type-checked, and _resolveBean[T]_ resolves beans by type
 
 ### The layering
 
-```
-┌─────────────────────────────────────────┐
-│  Macros: type-safe refs + resolveBean   │  ← compile-time guarantees
-├─────────────────────────────────────────┤
-│  inline + summonFrom: nesting guard     │  ← compile-time constraints
-├─────────────────────────────────────────┤
-│  Context functions: silent threading    │  ← clean syntax
-├─────────────────────────────────────────┤
-│  Opaque types: hidden internals         │  ← encapsulation
-├─────────────────────────────────────────┤
-│  Implicit conversion: builder → result  │  ← seamless API
-├─────────────────────────────────────────┤
-│  Extension methods: domain behaviour    │  ← readability
-└─────────────────────────────────────────┘
-```
-
-Each layer exists because the layer above needed it. No feature is gratuitous
+| Feature | Purpose |
+| ------------------------------------- | ----------------------------- |
+| Macros: type-safe refs + resolveBean  | Compile-time guarantees |
+| inline + summonFrom: nesting guard    | Compile-time constraints |
+| Context functions: silent threading   | Clean syntax |
+| Opaque types: hidden internals        | Encapsulation |
+| Implicit conversion: builder → result | Seamless API |
+| Extension methods: domain behaviour   | Readability |
 
 ---
 
