@@ -1,6 +1,8 @@
+<!-- .slide: class="center-slide" -->
+
 # yadi4s
 
-a TypeSafe DI DSL in Scala 3
+TypeSafe DI DSL in Scala 3
 
 ---
 
@@ -32,7 +34,7 @@ In yadi4s
 
 ----
 
-### Runtime failures you've seen
+### Runtime failures
 
 - NoSuchBeanDefinitionException
 
@@ -433,7 +435,7 @@ it was chosen because a DI-specific problem demanded it
 
 ### Context Functions (`?=>`) 
 
-- "Thread the builder silently"
+- Thread the builder silently
 
 - **Problem:** _ctx_ needs to provide a _CtxBuilder_, and _configuration_ needs a `ConfigurationBuilder` — but passing them explicitly ruins the DSL syntax
 
@@ -541,7 +543,7 @@ Implementation
 
 ----
 
-### `Selectable` + Structural Types — Dynamic names, static types
+### _Selectable_ + Structural Types — Dynamic names, static types
 
 - **Problem:** Bean names are defined at the DSL call site — the compiler can't know them in advance. But we still want _refs.databaseName_ to type-check
 
@@ -597,7 +599,7 @@ Implementation
 | --------------------------------- | --------------------------------------------- |
 | Extension methods                 | Add domain methods without coupling           |
 | Implicit conversion               | Builder → immutable result transparently      |
-| `Selectable` + structural types   | Dot-notation bean access with type safety     |
+| _Selectable_ + structural types   | Dot-notation bean access with type safety     |
 | Optional braces                   | Configuration-like readability                |
 
 ---
@@ -868,8 +870,6 @@ The Scala 3 feature set has plenty of room to grow this DSL beyond its current f
 
 ## When to Use a DSL?
 
-### Good Candidates
-
 - **Configuration / wiring** — Spring-style bean contexts, dependency injection graphs
 - **Testing / assertions** — declarative spec-like syntax where readability matters
 - **Build definitions** — sbt, Gradle Kotlin DSL
@@ -880,11 +880,11 @@ The Scala 3 feature set has plenty of room to grow this DSL beyond its current f
 
 ## Takeaways
 
-1. **DI failures are type errors** — the compiler should catch them, not the runtime
-2. **Scala 3 macros** make it possible to generate precise types from DSL definitions
-3. **`inline` + `summonFrom`** turn domain rules into compiler rules
-4. **Context functions + opaque types** give you clean syntax without leaking internals
-5. **Method-level _using_ injection** leverages Scala 3's implicit resolution as a DI mechanism — no framework magic needed
+- **DI failures are type errors** — the compiler should catch them, not the runtime
+- **Scala 3 macros** make it possible to generate precise types from DSL definitions
+- **`inline` + `summonFrom`** turn domain rules into compiler rules
+- **Context functions + opaque types** give you clean syntax without leaking internals
+- **Method-level _using_ injection** leverages Scala 3's implicit resolution as a DI mechanism — no framework magic needed
 
 ---
 

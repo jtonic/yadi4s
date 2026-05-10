@@ -27,6 +27,8 @@
             .reveal .slides section h3 {
                 text-transform: none;
             }
+            .reveal .slides section h2 { margin-bottom: 0.6em; }
+            .reveal .slides section h3 { margin-bottom: 0.5em; }
             .reveal strong {
                 color: #42a5f5;
             }
@@ -36,15 +38,22 @@
             }
             .reveal pre,
             .reveal table { font-size: 0.7em; }
-            .reveal pre { border-radius: 8px; overflow: hidden; background: rgba(13, 43, 74, 0.6) !important; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); }
-            .reveal pre code { border-radius: 8px; background: transparent !important; }
-            .reveal li { font-size: 0.8em; }
+            .reveal table { border-radius: 8px; overflow: hidden; background: rgba(13, 43, 74, 0.6) !important; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); }
+            .reveal table th,
+            .reveal table td { background: transparent !important; }
+            .reveal table th { background: rgba(0, 0, 0, 0.25) !important; }
+            .reveal pre { border-radius: 8px; overflow: auto; background: rgba(13, 43, 74, 0.6) !important; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); scrollbar-color: rgba(13, 43, 74, 0.8) transparent; margin-left: 0; padding-left: 0.6em; }
+            .reveal pre::-webkit-scrollbar { width: 6px; height: 6px; }
+            .reveal pre::-webkit-scrollbar-track { background: transparent; }
+            .reveal pre::-webkit-scrollbar-thumb { background: rgba(13, 43, 74, 0.8); border-radius: 3px; }
+            .reveal pre code { border-radius: 8px; background: transparent !important; padding-left: 0.6em; }
+            .reveal li { font-size: 0.8em; margin-bottom: 0.5em; }
             .reveal .slides .center-slide,
             .reveal .slides .center-slide h1,
             .reveal .slides .center-slide h2,
             .reveal .slides .center-slide h3 { text-align: center !important; }
             .reveal code {
-                font-size: 0.4em;
+                font-size: 0.8em;
             }
         </style>
     </head>
@@ -62,6 +71,11 @@
             Reveal.initialize({
                 plugins: [RevealMarkdown, RevealHighlight, RevealNotes],
                 hash: true,
+                width: "100%",
+                height: "100%",
+                margin: 0.1,
+                minScale: 1,
+                maxScale: 1,
             });
             Reveal.on("ready", () => {
                 document.querySelectorAll(".slides li").forEach((li) => li.classList.add("fragment"));
