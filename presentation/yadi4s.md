@@ -13,7 +13,7 @@ A **Domain-Specific Language** (DSL) is a mini-language tailored to a problem do
 Key traits
 
 - **Reads like intent** — declarative, not imperative
-- **Domain vocabulary** — method names mirror the problem (`ctx`, `configuration`, `bean`)
+- **Domain vocabulary** — method names mirror the problem (_ctx_, _configuration_, _bean_)
 - **Type-safe** — the compiler enforces rules at compile time
 
 ----
@@ -56,9 +56,9 @@ In yadi4s
 
 ----
 
-- These are **type errors**. 
+- These are **type errors** 
 
-- In any other context, the compiler catches them. 
+- In any other context, the compiler catches them
 
 - In Spring DI, they become runtime surprises
 
@@ -108,7 +108,7 @@ A DI container where **the compiler is the test suite**:
 - Reference a bean that doesn't exist → **compile error**
 - Reference a bean with the wrong type → **compile error**
 - Two beans match the same type → **compile error**
-- Nest a `configuration` inside another → **compile error**
+- Nest a _configuration_ inside another → **compile error**
 - Typo a bean name → **compile error**
 
 ----
@@ -146,7 +146,7 @@ def yadi4sMain =
 
 | Concept             | Spring DI (Java)               | yadi4s (Scala 3)               |
 | ------------------- | ------------------------------ | ------------------------------ |
-| Container           | `ApplicationContext`           | `Ctx`                          |
+| Container           | `ApplicationContext`           | _ctx_                          |
 | Configuration class | `@Configuration class`         | `configuration("name")`        |
 | Bean definition     | `@Bean method`                 | `bean(name = "...") { value }` |
 | Bean reference      | `@Autowired` / `ctx.getBean()` | `ctx.refs.beanName`            |
@@ -299,11 +299,11 @@ Scala macros give you **compile-time guarantees** that Spring DI can only dream 
 
 ----
 
-### `refs` — Structural Typing via Macro
+### _refs_ — Structural Typing via Macro
 
-The `refs` extension method triggers a macro that:
+The _refs_ extension method triggers a macro that:
 
-1. Walks the AST to discover all `bean(...)` calls inside the `Ctx`
+1. Walks the AST to discover all _bean(...)_ calls inside the _ctx_
 2. Extracts each bean's **name** and **type**
 3. Builds a **refined structural type** with those names as members
 4. Returns an object that the compiler treats as having those exact fields
@@ -340,14 +340,13 @@ beanRefs.typosHere     // ✗ compile error: value typosHere is not a member
 ```scala
 trait Refs extends Selectable:
   def selectDynamic(name: String): Any
-
 class RefsImpl(ctx: Ctx) extends Refs:
   def selectDynamic(name: String): Any =
     ctx.beans.find(_.name == name).map(_.value).getOrElse(...)
-
+    
 extension (inline ctx: Ctx)
   transparent inline def refs: Any = ${ refsMacro('ctx) }
-
+  
 def refsMacro(ctxExpr: Expr[Ctx])(using Quotes): Expr[Any] =
   // 1. Walk AST → collect (name, TypeRepr) pairs
   // 2. Build refined type: Refs { def databaseName: String; ... }
@@ -366,7 +365,7 @@ You get the safety of a typed API with the flexibility of dynamic dispatch
 
 ### Compile-Time Bean Lookup by Type **resolveBean[T]**
 
-- The `resolveBean` macro answers a single question 
+- The _resolveBean_ macro answers a single question 
 
 - _given this context, which bean provides type `T`?_
 
@@ -388,17 +387,17 @@ You get the safety of a typed API with the flexibility of dynamic dispatch
 
 It walks the same AST, but instead of building a structural type, it:
 
-1. Collects all **(name, TypeRepr)** pairs from `bean(...)` calls
-2. Filters by **tpe <:< TypeRepr.of[T]** (subtype check)
-3. **Zero matches** → compile error: `No bean found matching type T`
-4. **One match** → generates `new RefsImpl(ctx).selectDynamic(name).asInstanceOf[T]`
-5. **Multiple matches** → compile error: `Ambiguous dependency for type T. Found matching beans: a, b`
+- Collects all **(name, TypeRepr)** pairs from _bean(...)_ calls
+- Filters by **tpe <:< TypeRepr.of[T]** (subtype check)
+- **Zero matches** → compile error: _No bean found matching type T_
+- **One match** → generates _new RefsImpl(ctx).selectDynamic(name).asInstanceOf[T]_
+- **Multiple matches** → compile error: _Ambiguous dependency for type T. Found matching beans: a, b_
 
 ----
 
 ### Summary: What the Compiler Catches
 
-| Error             | Without macros                   | With `refs` + `resolveBean` |
+| Error             | Without macros                   | With _refs_ + _resolveBean_ |
 | ----------------- | -------------------------------- | --------------------------- |
 | Typo in bean name | Runtime `NoSuchBean`             | **Compile error**           |
 | Wrong type        | Runtime `ClassCastException`     | **Compile error**           |
@@ -417,9 +416,9 @@ it was chosen because a DI-specific problem demanded it
 
 ### Opaque Types — "Hide the plumbing"
 
-- Users shouldn't see mutable `ListBuffer` internals. 
+- Users shouldn't see mutable _ListBuffer_ internals. 
 
-- They should only see `CtxBuilder` and `ConfigurationBuilder` as opaque handles
+- They should only see _CtxBuilder_ and _ConfigurationBuilder_ as opaque handles
 
   ```scala
   opaque type CtxBuilder = ListBuffer[ConfigurationBuilder]
@@ -427,7 +426,7 @@ it was chosen because a DI-specific problem demanded it
   ```
 
 - **What it gives you:** 
-  - The DSL user cannot call `.map()`, `.filter()`, or any `ListBuffer` method on a `CtxBuilder`. 
+  - The DSL user cannot call _.map()_, _.filter()_, or any _ListBuffer_ method on a _CtxBuilder_. 
   - Only the operations the DSL author explicitly provides are available
 
 ----
@@ -436,7 +435,7 @@ it was chosen because a DI-specific problem demanded it
 
 - "Thread the builder silently"
 
-- **Problem:** `ctx` needs to provide a `CtxBuilder`, and `configuration` needs a `ConfigurationBuilder` — but passing them explicitly ruins the DSL syntax
+- **Problem:** _ctx_ needs to provide a _CtxBuilder_, and _configuration_ needs a `ConfigurationBuilder` — but passing them explicitly ruins the DSL syntax
 
 - Without context functions (ugly):
   ```scala
@@ -473,7 +472,7 @@ With context functions (clean)
 
 **inline** + **summonFrom** + **error**
 
-- **Problem:** Nesting `configuration` inside `configuration` is semantically wrong. 
+- **Problem:** Nesting _configuration_ inside _configuration_ is semantically wrong. 
 - In Spring DI, nothing prevents it. In yadi4s, it's a compile error
 
   ```scala
@@ -504,16 +503,16 @@ Implementation
 
 ### Macros (`scala.quoted`) — Type-check bean references
 
-- **Problem:** `ctx.refs.someName` must be type-checked. 
+- **Problem:** _ctx.refs.someName_ must be type-checked. 
   The compiler needs to know which names exist and what types they have — but the beans are defined dynamically in DSL blocks
 
-- **Solution:** The `refsMacro` and `resolveBeanImpl` macros inspect the AST at compile time, extract bean definitions, and generate code with precise types
+- **Solution:** The _refsMacro_ and _resolveBeanImpl_ macros inspect the AST at compile time, extract bean definitions, and generate code with precise types
 
 ----
 
 ### Extension Methods — Add domain behaviour without pollution
 
-- **Problem:** `Ctx` is a data type. Adding `asReport` to it directly would couple data to presentation
+- **Problem:** _ctx_ is a data type. Adding _asReport_ to it directly would couple data to presentation
 
   ```scala
   extension (ctx: Ctx)
@@ -528,7 +527,7 @@ Implementation
 
 ### Implicit Conversion — Builder to result, transparently
 
-- **Problem:** `ctx` internally builds a `CtxBuilder`, but the user expects a `Ctx` back
+- **Problem:** _ctx_ internally builds a _CtxBuilder_, but the user expects a _ctx_ back
 
   ```scala
   given ctxBuilderProvider: Conversion[CtxBuilder, Ctx] = builder =>
@@ -537,14 +536,14 @@ Implementation
   ```
 
 - **What it gives you:** 
-  - `def ctx(init: CtxBuilder ?=> Unit): Ctx` — the return type is `Ctx`, not `CtxBuilder`. 
+  - `def ctx(init: CtxBuilder ?=> Unit): Ctx` — the return type is _ctx_, not _CtxBuilder_. 
   - The conversion happens automatically
 
 ----
 
 ### `Selectable` + Structural Types — Dynamic names, static types
 
-- **Problem:** Bean names are defined at the DSL call site — the compiler can't know them in advance. But we still want `refs.databaseName` to type-check
+- **Problem:** Bean names are defined at the DSL call site — the compiler can't know them in advance. But we still want _refs.databaseName_ to type-check
 
   ```scala
   trait Refs extends Selectable:
@@ -552,7 +551,7 @@ Implementation
   ```
 
 - **What it gives you:** 
-  - Combined with the `refsMacro` (which builds a refined type), this gives you **dot-notation access with full type safety** — no `asInstanceOf`, no `Map[String, Any]`
+  - Combined with the _refsMacro_ (which builds a refined type), this gives you **dot-notation access with full type safety** — no _asInstanceOf_, no `Map[String, Any]`
 
 ----
 
@@ -633,9 +632,9 @@ fun ctx(init: CtxBuilder.() -> Unit): Ctx {
 
 ----
 
-- **Lambda with receiver** (`T.() -> Unit`) scopes DSL calls
+- **Lambda with receiver** (_T.() -> Unit_) scopes DSL calls
 - **`@DslMarker`** prevents scope mixing — but it's a **runtime annotation**, not a compiler intrinsic
-- **No macro system** — cannot generate type-safe `refs` or compile-time `resolveBean`
+- **No macro system** — cannot generate type-safe _refs_ or compile-time _resolveBean_
 
 ----
 
@@ -651,7 +650,7 @@ extension (inline ctx: Ctx)
 
 - **Context functions** scope DSL calls — no receiver type needed
 - **`inline` + `summonFrom`** prevents nesting — enforced at compile time, no annotation
-- **Macros** generate precise types — `refs.databaseName: String` is a compile-time fact
+- **Macros** generate precise types — _refs.databaseName: String_ is a compile-time fact
 
 ----
 
@@ -659,7 +658,7 @@ extension (inline ctx: Ctx)
 
 | Aspect                       | Kotlin                                | Scala 3 (yadi4s)                             |
 | ---------------------------- | ------------------------------------- | -------------------------------------------- |
-| Scoped builder               | Lambda with receiver (`T.() -> Unit`) | Context function (`CtxBuilder ?=> Unit`)     |
+| Scoped builder               | Lambda with receiver (_T.() -> Unit_) | Context function (_CtxBuilder ?=> Unit_)     |
 | Prevent scope mixing         | `@DslMarker` annotation               | `inline` + `summonFrom` (compiler intrinsic) |
 | Nesting guard                | Runtime (best-effort)                 | **Compile time**                             |
 | Type-safe bean access        | Not possible (no macros)              | **Macro-generated structural type**          |
@@ -668,9 +667,9 @@ extension (inline ctx: Ctx)
 
 | Aspect                       | Kotlin                                | Scala 3 (yadi4s)                             |
 | ---------------------------- | ------------------------------------- | -------------------------------------------- |
-| Compile-time bean resolution | Not possible                          | **`resolveBean[T]` macro**                   |
+| Compile-time bean resolution | Not possible                          | **_resolveBean[T]_ macro**                   |
 | Hide internals               | Private constructor                   | Opaque types                                 |
-| Builder → result             | `.build()` call                       | Implicit conversion                          |
+| Builder → result             | _.build()_ call                       | Implicit conversion                          |
 
 
 - **Bottom line:** 
@@ -681,7 +680,7 @@ extension (inline ctx: Ctx)
 
 ## Top-Down Walkthrough
 
-The DSL was built **top-down**: 
+The DSL was built **top-down** 
 - start from the desired call site 
 - then add language features until it compiles and enforces the rules
 
@@ -707,11 +706,11 @@ def ctx(init: CtxBuilder ?=> Unit): Ctx =
   builder
 ```
 
-Now `ctx` compiles, but `configuration` inside it doesn't — `CtxBuilder` isn't in scope for `configuration` yet
+Now _ctx_ compiles, but _configuration_ inside it doesn't — _CtxBuilder_ isn't in scope for _configuration_ yet
 
 ----
 
-### Step 3: Add `using` clauses — make builders available
+### Step 3: Add _using_ clauses — make builders available
 
 ```scala
 inline def configuration(name: String)(
@@ -737,11 +736,11 @@ inline def checkNoNested[T](inline errorMessage: String)(
     case _       => block
 ```
 
-- Call it inside `configuration`:
+- Call it inside _configuration_:
 
   ```scala
   checkNoNested[ConfigurationBuilder](
-    "`configuration` cannot be nested inside another `configuration`"
+    "_configuration_ cannot be nested inside another _configuration_"
   ):
     // ... configuration body
   ```
@@ -755,7 +754,7 @@ opaque type CtxBuilder = ListBuffer[ConfigurationBuilder]
 opaque type ConfigurationBuilder = ConfigurationBuilder.Internal
 ```
 
-Users can't call `ListBuffer` methods on `CtxBuilder`. Clean API surface
+Users can't call _ListBuffer_ methods on _CtxBuilder_. Clean API surface
 
 ----
 
@@ -766,7 +765,7 @@ given Conversion[CtxBuilder, Ctx] = builder =>
   // convert mutable builder to immutable Ctx
 ```
 
-`ctx` returns `Ctx` — users never see `CtxBuilder`
+_ctx_ returns _ctx_ — users never see _CtxBuilder_
 
 ----
 
@@ -779,7 +778,7 @@ extension (inline ctx: Ctx)
 inline given resolveBean[T]: T = ${ resolveBeanImpl[T]('this) }
 ```
 
-Now `refs.beanName` is type-checked, and `resolveBean[T]` resolves beans by type — all at compile time
+Now _refs.beanName_ is type-checked, and _resolveBean[T]_ resolves beans by type — all at compile time
 
 ----
 
@@ -811,9 +810,9 @@ yadi4s is a proof of concept. A real DI system needs more:
 
 | Feature                              | Why                                                                          | Possible Scala 3 mechanism                                                    |
 | ------------------------------------ | ---------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
-| **Qualifiers**                       | Multiple beans of the same type                                              | `bean(name = "x", qualifier = "primary")` — refined in `resolveBean` matching |
+| **Qualifiers**                       | Multiple beans of the same type                                              | _bean(name = "x", qualifier = "primary")_ — refined in _resolveBean_ matching |
 | **Scoped lifecycle**                 | Singleton, prototype, request-scoped                                         | Context functions + given scoping                                             |
-| **`export` clauses**                 | Flat API from nested objects                                                 | `export Configurations.*; export Beans.*`                                     |
+| **`export` clauses**                 | Flat API from nested objects                                                 | _export Configurations.*; export Beans.*_                                     |
 
 The Scala 3 feature set has plenty of room to grow this DSL beyond its current form — without sacrificing compile-time safety
 
@@ -821,7 +820,8 @@ The Scala 3 feature set has plenty of room to grow this DSL beyond its current f
 
 ## DSL Pros & Cons
 
-No silver bullet — the right tool depends on the task. Here's how internal DSLs compare to other abstraction choices:
+- No silver bullet
+- The right tool depends on the task 
 
 ----
 
@@ -846,10 +846,9 @@ No silver bullet — the right tool depends on the task. Here's how internal DSL
 
 ### Performance Considerations
 
-A DSL is a **wrapper** — it sits on top of existing APIs and inevitably adds overhead:
-
-- **Indirection cost** — each `ctx`, `configuration`, `bean` call adds a layer of function invocation and builder mutation
-- **Allocation cost** — builders (`ListBuffer`, intermediate objects) are allocated and then discarded during the conversion phase
+- A DSL is a **wrapper** — it sits on top of existing APIs and inevitably adds overhead
+- **Indirection cost** — each _ctx_, _configuration_, _bean_ call adds a layer of function invocation and builder mutation
+- **Allocation cost** — builders (_ListBuffer_, intermediate objects) are allocated and then discarded during the conversion phase
 - **Features hidden by the DSL** — the underlying APIs may expose capabilities that the DSL doesn't surface (e.g. lazy initialization, scoped lifecycle, ordering guarantees)
 - **When it matters** — if the DSL is on a hot path (e.g. request handling), measure first
 
@@ -877,8 +876,6 @@ A DSL is a **wrapper** — it sits on top of existing APIs and inevitably adds o
 - **Routing / HTTP** — path combinators, middleware pipelines
 - **Data pipelines** — ETL, stream processing, query builders
 
-The common thread: **declarative intent over imperative steps**, **read over write**, **non-performance-critical paths**
-
 ---
 
 ## Takeaways
@@ -888,3 +885,16 @@ The common thread: **declarative intent over imperative steps**, **read over wri
 3. **`inline` + `summonFrom`** turn domain rules into compiler rules
 4. **Context functions + opaque types** give you clean syntax without leaking internals
 5. **Method-level `using` injection** leverages Scala 3's implicit resolution as a DI mechanism — no framework magic needed
+
+---
+
+<!-- .slide: class="center-slide" -->
+
+## Thanks!
+
+
+---
+
+<!-- .slide: class="center-slide" -->
+
+## Q & A
