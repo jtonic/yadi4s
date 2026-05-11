@@ -527,6 +527,30 @@ it was chosen because a DI-specific problem demanded it
 
 ----
 
+### Transparent Inline — Preserve refined types through method calls
+
+- **Problem:** When _refs_ returns a refined structural type, the return type must be preserved precisely. 
+
+  Regular _inline_ methods infer the declared return type (_Any_), losing the refinement
+
+  ```scala
+  inline def refs: Any = ${ refsMacro('ctx) }  // ✗ returns Any, refinement lost
+  ```
+
+----
+
+#### Transparent inline preserves the exact type
+
+  ```scala
+  transparent inline def refs: Any = ${ refsMacro('ctx) }  // ✓ returns the refined type
+  ```
+
+- **What it gives you?** 
+  - The compiler sees _refs.databaseUrl_ as _String_, not _Any_
+  - The macro generates a refined type like `Refs { val databaseUrl: String }`, and _transparent inline_ ensures it survives the method boundary
+
+----
+
 ### Extension Methods — Add domain behaviour without pollution
 
 - **Problem:** _ctx_ is a data type. Adding _asReport_ to it directly would couple data to presentation
@@ -589,7 +613,7 @@ it was chosen because a DI-specific problem demanded it
 
 ----
 
-#### Without braces** (Scala 3)
+#### Without braces (Scala 3)
   ```scala
   ctx:
     configuration("Infrastructure"):
@@ -609,6 +633,7 @@ it was chosen because a DI-specific problem demanded it
 | Context functions (`?=>`)         | Thread builders without polluting syntax      |
 | `inline` + `summonFrom` + `error` | Compile-time nesting guard                    |
 | Macros (`scala.quoted`)           | Compile-time bean resolution & type-safe refs |
+| `transparent inline`              | Preserve refined types through method calls   |
 
 ----
 
@@ -650,6 +675,8 @@ fun ctx(init: CtxBuilder.() -> Unit): Ctx {
 ```
 
 ----
+
+#### Kotlin DSL friendly feature
 
 - **Lambda with receiver** (_T.() -> Unit_) scopes DSL calls
 - **`@DslMarker`** prevents scope mixing — but it's a **runtime annotation**, not a compiler intrinsic
