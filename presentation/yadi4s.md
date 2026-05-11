@@ -520,6 +520,7 @@ it was chosen because a DI-specific problem demanded it
 ### Macros (`scala.quoted`) — Type-check bean references
 
 - **Problem:** _ctx.refs.someName_ must be type-checked. 
+
   The compiler needs to know which names exist and what types they have — but the beans are defined dynamically in DSL blocks
 
 - **Solution:** The _refsMacro_ and _resolveBeanImpl_ macros inspect the AST at compile time, extract bean definitions, and generate code with precise types
@@ -559,7 +560,9 @@ it was chosen because a DI-specific problem demanded it
 
 ### _Selectable_ + Structural Types — Dynamic names, static types
 
-- **Problem:** Bean names are defined at the DSL call site — the compiler can't know them in advance. But we still want _refs.databaseName_ to type-check
+- **Problem:** Bean names are defined at the DSL call site
+
+  The compiler can't know them in advance. But we still want _refs.databaseName_ to type-check
 
   ```scala
   trait Refs extends Selectable:
@@ -586,7 +589,7 @@ it was chosen because a DI-specific problem demanded it
 
 ----
 
-**Without braces** (Scala 3):
+#### Without braces** (Scala 3)
   ```scala
   ctx:
     configuration("Infrastructure"):
