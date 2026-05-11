@@ -2,7 +2,17 @@
 
 # yadi4s
 
-TypeSafe DI DSL in Scala 3
+---
+
+<!-- .slide: class="center-slide" -->
+
+## Yet Another DI for Scala
+
+----
+
+### A sneak pick
+
+![refined_type](./assets/refined_type.png)
 
 ---
 
@@ -12,7 +22,7 @@ A **Domain-Specific Language** (DSL) is a mini-language tailored to a problem do
 
 ----
 
-Key traits
+### Key traits
 
 - **Reads like intent** — declarative, not imperative
 - **Domain vocabulary** — method names mirror the problem (_ctx_, _configuration_, _bean_)
@@ -20,7 +30,7 @@ Key traits
 
 ----
 
-In yadi4s
+### In yadi4s
 
 - you write bean configuration **as if it were a configuration file (yaml)**
 - but the Scala compiler validates every reference
@@ -58,6 +68,8 @@ In yadi4s
 
 ----
 
+### Thinking...
+
 - These are **type errors** 
 
 - In any other context, the compiler catches them
@@ -80,6 +92,8 @@ class AppConfig {
 ```
 
 ----
+
+### Explanation
 
 - Bean names and types are **strings and annotations** — invisible to the type checker
 - Wiring happens via **reflection at runtime** — no compile-time validation
@@ -105,7 +119,7 @@ class AppConfig {
 
 ## The Vision
 
-A DI container where **the compiler is the test suite**:
+A DI container where **the compiler is the test suite**
 
 - Reference a bean that doesn't exist → **compile error**
 - Reference a bean with the wrong type → **compile error**
@@ -207,7 +221,7 @@ def yadi4sMain =
 
 ----
 
-**Output**
+### Output - DI report
 
 ```text
 Configuration 1: Infrastructure:
@@ -226,7 +240,7 @@ Configuration 2: Application:
 
 - In yadi4s, injection happens at the **method level** via _using_ parameters — not via constructors or field injection
 
-- Dependencies at the method level via _using_ parameters
+- Declarative dependencies
 
   ```scala
   // UserService declares what it needs on each method
@@ -240,7 +254,7 @@ Configuration 2: Application:
 
 ----
 
-Injecting dependencies
+### Injecting dependencies
 
 ----
 
@@ -357,7 +371,7 @@ def refsMacro(ctxExpr: Expr[Ctx])(using Quotes): Expr[Any] =
 
 ----
 
-The key insight 
+### The key insight 
 
 - _selectDynamic_ is dynamic at runtime, but the refined type makes it static at compile time.
 
@@ -442,14 +456,14 @@ it was chosen because a DI-specific problem demanded it
 - Without context functions (ugly):
   ```scala
   ctx(builder1 => {
-    configuration("Infrastructure", builder1, builder2 => {
+    configuration("Infrastructure", builder2 => {
       bean("databaseUrl", builder2, "jdbc:postgresql://localhost:5432/mydb")
     })
   })
 
 ----
 
-With context functions (clean)
+### With context functions
 
   ```scala
   ctx:
@@ -486,7 +500,7 @@ With context functions (clean)
 
 ----
 
-Implementation
+#### Implementation
 
   ```scala
   inline def checkNoNested[T](inline errorMessage: String)(
