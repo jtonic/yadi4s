@@ -166,6 +166,7 @@ def yadi4sMain =
 | Configuration class | `@Configuration class`         | `configuration("name")`        |
 | Bean definition     | `@Bean method`                 | `bean(name = "...") { value }` |
 | Bean reference      | `@Autowired` / `ctx.getBean()` | `ctx.refs.beanName`            |
+| Compose contexts    | `@Import(OtherConfig.class)`   | `register(childCtx)`           |
 
 ----
 
@@ -732,7 +733,7 @@ The DSL was built **top-down**
 
 ----
 
-### Step 1: Write the dream syntax (doesn't compile yet)
+### Step 1: Write the target syntax (doesn't compile yet)
 
 ```scala
 val appCtx: Ctx =
@@ -849,9 +850,10 @@ yadi4s is a proof of concept. A real DI system needs more:
 | ------------------------------------ | ---------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
 | **Qualifiers**                       | Multiple beans of the same type                                              | _bean(name = "x", qualifier = "primary")_ — refined in _resolveBean_ matching |
 | **Scoped lifecycle**                 | Singleton, prototype, request-scoped                                         | Context functions + given scoping                                             |
+| **Compose contexts (`register`)**    | Merge multiple contexts into one for modular configuration                   | _register(childCtx)_ — flatten configurations and beans from child into parent |
 | **`export` clauses**                 | Flat API from nested objects                                                 | _export Configurations.*; export Beans.*_                                     |
 
-The Scala 3 feature set has plenty of room to grow this DSL beyond its current form — without sacrificing compile-time safety
+The Scala 3 feature set has plenty of room to grow this DSL beyond its current form, without sacrificing compile-time safety
 
 ---
 
