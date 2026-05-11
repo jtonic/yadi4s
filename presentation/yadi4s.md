@@ -857,6 +857,28 @@ The Scala 3 feature set has plenty of room to grow this DSL beyond its current f
 
 ---
 
+## Known Issues
+
+yadi4s is a proof of concept with known limitations
+
+----
+
+### Scope sensitivity
+
+- Bean definitions and _ctx_ usage must be in the same scope
+- Moving usage to a different scope causes compilation errors
+- The macro cannot inspect bean definitions across scope boundaries
+
+----
+
+### ScalaTest matcher conflict
+
+- Using _ctx.refs_ with ScalaTest's _should_ matchers causes failures
+- Likely caused by macro expansion conflicts
+- Both yadi4s and ScalaTest use macros for type refinement
+
+---
+
 ## DSL Pros & Cons
 
 - No silver bullet
