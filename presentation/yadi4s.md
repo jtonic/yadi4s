@@ -10,7 +10,7 @@
 
 ----
 
-### A sneak pick
+### A sneak peek
 
 ![refined_type](./assets/refined_type.png)
 
