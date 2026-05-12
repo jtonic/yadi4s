@@ -30,9 +30,13 @@ object business:
       repo.findAll()
 
   class App:
-    def run()(using UserService, UserRepository, DatabaseConfig): Unit =
+    def run()(using
+        userService: UserService,
+        userRepository: UserRepository,
+        databaseConfig: DatabaseConfig
+    ): Unit =
       println("--- App running ---")
-      val user = summon[UserService].getUser("1")
+      val user = userService.getUser("1")
       println(s"Found user: $user")
-      val all = summon[UserService].listUsers()
+      val all = userService.listUsers()
       println(s"All users: $all")

@@ -947,6 +947,21 @@ yadi4s is a proof of concept with known limitations
 
 ---
 
+## References
+
+- [Structural Types](https://docs.scala-lang.org/scala3/book/types-structural.html)
+- [Opaque Type](https://docs.scala-lang.org/scala3/book/types-opaque-types.html)
+- [Refined Types](https://medium.com/@markgrechanik/type-refinements-in-scala-making-your-types-more-sophisticated-than-your-friends-23600b2305d2)
+- [Transparent Inline](https://docs.scala-lang.org/scala3/guides/macros/inline.html#transparent-inline-methods)
+- [Macros](https://docs.scala-lang.org/scala3/guides/macros/macros.html)
+- [Optional braces](https://docs.scala-lang.org/scala3/reference/other-new-features/indentation.html)
+- [Context functions](https://docs.scala-lang.org/scala3/reference/contextual/context-functions.html#)
+- [compile error & summon](https://docs.scala-lang.org/scala3/guides/macros/compiletime.html)
+- [Extension methods](https://docs.scala-lang.org/scala3/book/ca-extension-methods.html#import-extension-method)
+- [Implicit conversion](https://docs.scala-lang.org/scala3/book/ca-implicit-conversions.html#defining-an-implicit-conversion)
+
+---
+
 <!-- .slide: class="center-slide" -->
 
 ## Thanks!

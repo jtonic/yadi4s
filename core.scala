@@ -1,8 +1,8 @@
-import scala.collection.mutable.ListBuffer
-import scala.compiletime.{summonFrom, error}
-import scala.quoted.*
-
 object yadis:
+  import scala.collection.mutable.ListBuffer
+  import scala.compiletime.{summonFrom, error}
+  import scala.quoted.*
+
   object di:
     case class Ctx(configurations: List[Configuration], beans: Set[Bean[?]]):
       override def toString: String =
