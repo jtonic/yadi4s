@@ -1,7 +1,7 @@
 @main
 def main =
-  import yadis.di.*
-  import business.*
+  import yadis.di.* // import yadis API
+  import business.* // this is client side business API
 
   val appCtx =
     ctx:
